@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// model User {
+//   id    Int     @default(autoincrement()) @id
+//   email String  @unique
+//   name  String?
+//   posts Post[]
+// }
+
+// model Post {
+//   id        Int      @default(autoincrement()) @id
+//   title     String
+//   content   String?
+//   published Boolean? @default(false)
+//   author    User?    @relation(fields: [authorId], references: [id])
+//   authorId  Int?
+// }
+
+model User {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  email String @unique
+  hash  String
+
+  firstName String?
+  lastName  String?
+
+  posts     Post[]
+  profile   Profile?
+  bookmarks Bookmark[]
+  @@map("users")
+}
+
+model Bookmark {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  title       String
+  description String?
+  link        String
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  @@map("bookmarks")
+}
+
+model Profile {
+  id     Int    @id @default(autoincrement())
+  bio    String
+  user   User   @relation(fields: [userId], references: [id])
+  userId Int    @unique
+
+  @@map("profiles")
+}
+
+model Post {
+  id         Int        @id @default(autoincrement())
+  createdAt  DateTime   @default(now())
+  title      String
+  published  Boolean    @default(false)
+  author     User       @relation(fields: [authorId], references: [id])
+  authorId   Int
+  categories Category[] @relation(references: [id])
+
+  @@map("posts")
+}
+
+model Category {
+  id    Int    @id @default(autoincrement())
+  name  String
+  posts Post[] @relation(references: [id])
+
+  @@map("categories")
+}
+
+model CategoryPost {
+  id     Int   @id @default(autoincrement())
+  post   Post? @relation(fields: [postId], references: [id])
+  tag    Category?  @relation(fields: [categoryId], references: [id])
+  postId Int?
+  categoryId  Int?
+  @@map("CategoryPost")
+}
